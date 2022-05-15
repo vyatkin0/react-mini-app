@@ -1,0 +1,20 @@
+body {
+    background-color:lightgrey;
+    --color-white: white;
+    --color-base-light: transparent;
+}
+.ea_panel{border-radius:4px;
+    padding:16px;
+    background-color:var(--color-white);
+    border:1px solid var(--color-base-light);
+    transition-property:box-shadow,border-color;
+    transition-duration:var(--transition-interaction)}
+.eap_no_border{border:none}
+.eap_no_padding{padding:0}
+.eap_no_background{background-color:transparent !important}
+.eap_elevated{
+    box-shadow:0 0 2px rgba(0,0,0,0.08),0 8px 24px rgba(0,0,0,0.08);
+    border-color:transparent
+}
+
+@media (max-width:768px){.ea_panel{padding:16px 8px}}
