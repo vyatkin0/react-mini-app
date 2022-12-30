@@ -1,18 +1,17 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { App } from './App';
+import App from './App';
 
-const element = document.createElement('div');
-document.body.appendChild(element);
+let element = document.createElement('div');
+document.body.replaceChildren(element);
 const root = createRoot(element);
 root.render(<App />);
 
 if (module.hot) {
-    module.hot.accept('./App.js', function () {
+    module.hot.accept(['./App.js', './int.js'], function () {
         console.log('Accepting the updated module!');
-        document.body.removeChild(element);
         element = document.createElement('div');
-        document.body.appendChild(element);
+        document.body.replaceChildren(element);
         const root = createRoot(element);
         root.render(<App />);
     });

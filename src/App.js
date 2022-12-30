@@ -1,141 +1,69 @@
 import React from 'react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { Doughnut, Line } from 'react-chartjs-2';
+import {Router, Route, RouterContext, RouteContext} from 'react-router-slim';
+import Int from './int.js';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend
-);
+//Router Link component implementation
+function Link ({ children, to, update }) {
+    const router = React.useContext(RouterContext);
+    const route = React.useContext(RouteContext);
+    const navigate = router.navigate;
+    const onClick = React.useCallback(e => {
+        e.preventDefault();
+        navigate?.(to);
+        update();
+    }, [to, navigate]);
 
-export const options = {
-  responsive: true,
-  aspectRatio: false,
-  pointRadius: 1,
-  pointHoverRadius: 1,
-  events: [],
-  scales: {
-    yAxes: {
-        title: {
-            display: true,
-            text: 'yAxisTitle',
-            font: {
-                size: 15
-            }
-        },
-        ticks: {
-            precision: 0
-        }
-    },
-    xAxes: {
-        title: {
-            display: true,
-            text: 'xAxisTitle',
-            font: {
-                size: 15
-            }
-        }
+    return React.createElement('a', { href: to, onClick: onClick}, children);
+}
+
+function RouteT({ children, path, error }) {
+    const router = React.useContext(RouterContext);
+
+    if (!router.match) {
+        throw new Error('Route requires a match function in the Router context');
     }
-  },
-  plugins: {
-      tooltip: {
-        enabled: false
-      },
-    legend: {
-      display: false,
-    },
-    title: {
-      align: 'start',
-      display: true,
-      color: '#527484',
-      text: 'SPEED TEST HISTORY',
-    },
-  },
-};
 
-const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+    const route = React.useContext(RouteContext);
 
-export const data = {
-  labels,
-  datasets: [
-    {
-      data: [1,2,3,5,6,7],
-      borderColor: '#527484',
-      backgroundColor: '#527484',
-    },
-  ],
-};
+    let routeParams = {};
+    let routePath  = (route.path || '') + (path || '');
 
-export const data2 = {
-  datasets: [
-    {
-      data: [70, 30],
-      borderRadius: [{ outerStart: 10, outerEnd: 0, innerStart: 10, innerEnd: 0 }, { outerStart: 0, outerEnd: 10, innerStart: 0, innerEnd: 10 }],
-      backgroundColor: [
-        '#527484',
-        '#EBEBEB',
-      ],
-      borderColor: [
-        '#4B4B4B',
-        '#EBEBEB',
-      ],
-      borderWidth: [2,0],
-    },
-  ],
-};
+    const childRoute = { ...route, path: routePath, params: routeParams, matches: [] };
 
-export const options2 = {
-  responsive: true,
-  aspectRatio: false,
-  events: [],
-  cutout: '90%',
-  rotation: -165,
-  circumference: 330,
-  tooltips: false,
-  backgroundColor: '#EBEBEB',
-  plugins: {
-    tooltip: {
-      enabled: false,
-    },
-  legend: {
-    position: 'top',
-  },
-  title: {
-    align: 'start',
-    color: '#527484',
-    display: true,
-    text: 'SPEED TEST',
-  },
-},
-};
+    const props = { value: childRoute };
 
-export function App() {
-  return <div style={{height:350, display:'flex', columnGap: 30}}>
-    <div className='ea_panel eap_elevated' style={{width: 350, position:'relative'}}>
-      <Doughnut options={options2} data={data2} />
-      <div style={{top: '50%', left:'50%', position:'absolute', transform:'translateX(-50%) translateY(-50%)', backgroundColor:'transparent', textAlign:'center'}}>
-        <h1>20</h1>
-        <div style={{fontSize:'xx-small'}}>Megabits per second</div>
-        </div>
-    </div>
-    <div className='ea_panel eap_elevated' style={{width: 1000}}><Line options={options} data={data} /></div>
-  </div>
-  ;
+    if (Array.isArray(children)) {
+        if (error) {
+            return React.createElement(RouteContext.Provider, props, React.createElement(ErrorBoundary, { FallbackComponent: error }, ...children));
+        }
+
+        return React.createElement(RouteContext.Provider, props, ...children);
+    }
+
+    if (error) {
+        return React.createElement(RouteContext.Provider, props, React.createElement(ErrorBoundary, { FallbackComponent: error }, children));
+    }
+
+    return React.createElement(RouteContext.Provider, props, children);
+}
+
+export default function App() {
+    const [id, setId] = React.useState(0);
+
+    const update = React.useCallback(()=>setId(id=>id), []);
+
+  return <div>
+    Application
+    <Router id="1">
+        <Link to="/route1" update={update}>To route 1</Link>
+        <Link to="/route2" update={update}>To route 2</Link>
+        <RouteT path="/route0">Route0</RouteT>
+        <RouteT path="/route00">Route00</RouteT>
+        <Router id="3">
+            <Route path="/route13"><div>Route31</div></Route>
+            <Route path="/route32"><div>Route32</div></Route>
+        </Router>
+        <Int></Int>
+    </Router>
+  </div>;
 }
